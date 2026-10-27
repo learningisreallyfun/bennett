@@ -2,29 +2,33 @@
 <html lang="en">
 <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>A Small World Cup</title>
     <style>
         html, body {
             height: 100%;
             margin: 0;
             font-family: system-ui, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+            background: #000;
         }
         .toolbar {
             display: flex;
             gap: .5rem;
-            padding: .5rem;
+            padding: .5rem 1rem;
             background: #111;
             color: #fff;
             align-items: center;
+            height: 48px;
+            box-sizing: border-box;
         }
         button {
             background: #0b84ff;
             color: #fff;
             border: 0;
-            padding: .5rem .8rem;
+            padding: .45rem .9rem;
             border-radius: 4px;
             cursor: pointer;
+            font-size: 14px;
         }
         button:active {
             transform: translateY(1px);
@@ -32,7 +36,7 @@
         .frame-wrapper {
             height: calc(100% - 48px);
             background: #000;
-            display: flex;
+            position: relative;
         }
         iframe {
             border: 0;
@@ -44,24 +48,24 @@
 </head>
 <body>
     <div class="toolbar">
-        <span>A Small World Cup</span>
+        <span style="font-weight:600">A Small World Cup</span>
         <button id="homeBtn">Home</button>
         <div style="flex:1"></div>
         <button id="fsBtn">Enter fullscreen</button>
     </div>
 
     <div class="frame-wrapper" id="frameWrapper">
-        <!-- Working online version of the game -->
+        <!-- Direct, working game file (no ads, no extra site UI) -->
         <iframe id="gameFrame"
-                src="https://sciencemathedu.github.io/asmallworldcup/"
+                src="https://unblocked-games.s3.amazonaws.com/a-small-world-cup.html"
                 allowfullscreen
-                allow="fullscreen"
+                allow="fullscreen; autoplay; gamepad"
                 title="A Small World Cup">
         </iframe>
     </div>
 
     <script>
-        const fsBtn = document.getElementById('fsBtn');
+        const fsBtn   = document.getElementById('fsBtn');
         const wrapper = document.getElementById('frameWrapper');
         const homeBtn = document.getElementById('homeBtn');
 
@@ -72,18 +76,18 @@
                       document.msFullscreenElement);
         }
 
-        function requestFull(element) {
-            if (element.requestFullscreen) return element.requestFullscreen();
-            if (element.webkitRequestFullscreen) return element.webkitRequestFullscreen();
-            if (element.mozRequestFullScreen) return element.mozRequestFullScreen();
-            if (element.msRequestFullscreen) return element.msRequestFullscreen();
+        function requestFull(el) {
+            return el.requestFullscreen?.() ||
+                   el.webkitRequestFullscreen?.() ||
+                   el.mozRequestFullScreen?.() ||
+                   el.msRequestFullscreen?.();
         }
 
         function exitFull() {
-            if (document.exitFullscreen) return document.exitFullscreen();
-            if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
-            if (document.mozCancelFullScreen) return document.mozCancelFullScreen();
-            if (document.msExitFullscreen) return document.msExitFullscreen();
+            return document.exitFullscreen?.() ||
+                   document.webkitExitFullscreen?.() ||
+                   document.mozCancelFullScreen?.() ||
+                   document.msExitFullscreen?.();
         }
 
         fsBtn.addEventListener('click', async () => {
@@ -95,22 +99,21 @@
                     await exitFull();
                     fsBtn.textContent = 'Enter fullscreen';
                 }
-            } catch (e) {
-                console.error('Fullscreen request failed', e);
+            } catch (err) {
+                console.error('Fullscreen failed:', err);
             }
         });
 
+        // Keep button text correct if user presses Esc
+        ['fullscreenchange','webkitfullscreenchange','mozfullscreenchange','MSFullscreenChange']
+            .forEach(e => document.addEventListener(e, () => {
+                fsBtn.textContent = isFullscreen() ? 'Exit fullscreen' : 'Enter fullscreen';
+            }));
+
         homeBtn.addEventListener('click', () => {
+            // Change this if your real home page is different
             window.location.href = 'index.html';
         });
-
-        // Keep button text in sync if user exits with Esc
-        ['fullscreenchange', 'webkitfullscreenchange', 'mozfullscreenchange', 'MSFullscreenChange']
-            .forEach(evt => {
-                document.addEventListener(evt, () => {
-                    fsBtn.textContent = isFullscreen() ? 'Exit fullscreen' : 'Enter fullscreen';
-                });
-            });
     </script>
 </body>
 </html>
